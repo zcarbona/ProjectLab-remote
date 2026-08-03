@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern, high-performance glassmorphic calculator powered by FastAPI. Features real-time calculation, history tracking, and full keyboard navigation.">
+    <title>FastAPI Glassmorphic Calculator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-glob glob-1" aria-hidden="true"></div>
+    <div class="background-glob glob-2" aria-hidden="true"></div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                        <line x1="8" y1="6" x2="16" y2="6"></line>
+                        <line x1="16" y1="14" x2="16" y2="18"></line>
+                        <path d="M16 10h.01"></path>
+                        <path d="M12 10h.01"></path>
+                        <path d="M8 10h.01"></path>
+                        <path d="M12 14h.01"></path>
+                        <path d="M8 14h.01"></path>
+                        <path d="M12 18h.01"></path>
+                        <path d="M8 18h.01"></path>
+                    </svg>
+                </div>
+                <span>FastAPI Calc</span>
+            </div>
+
+            <div class="header-actions">
+                <div id="server-status" class="status-badge offline" title="FastAPI Server Status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </div>
+                <button id="history-toggle-btn" class="icon-btn" title="Calculation History" aria-label="Toggle History">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="calculator-card">
+            <div class="screen-container">
+                <div class="screen-top-bar">
+                    <span id="expression-display" class="expression-text" aria-live="polite"></span>
+                    <button id="copy-btn" class="copy-btn" title="Copy result" aria-label="Copy Result">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="main-display" class="main-display-text" tabindex="0" role="textbox" aria-label="Calculator display">0</div>
+            </div>
+
+            <div class="keypad-grid" role="group" aria-label="Calculator Keypad">
+                <button class="key action-key" data-action="clear" id="key-clear" aria-label="Clear All">AC</button>
+                <button class="key action-key" data-action="delete" id="key-delete" aria-label="Delete Last Entry">DEL</button>
+                <button class="key action-key" data-action="negate" id="key-negate" aria-label="Toggle Sign">±</button>
+                <button class="key operator-key" data-operator="/" id="key-divide" aria-label="Divide">÷</button>
+
+                <button class="key num-key" data-num="7" id="key-7">7</button>
+                <button class="key num-key" data-num="8" id="key-8">8</button>
+                <button class="key num-key" data-num="9" id="key-9">9</button>
+                <button class="key operator-key" data-operator="*" id="key-multiply" aria-label="Multiply">×</button>
+
+                <button class="key num-key" data-num="4" id="key-4">4</button>
+                <button class="key num-key" data-num="5" id="key-5">5</button>
+                <button class="key num-key" data-num="6" id="key-6">6</button>
+                <button class="key operator-key" data-operator="-" id="key-subtract" aria-label="Subtract">−</button>
+
+                <button class="key num-key" data-num="1" id="key-1">1</button>
+                <button class="key num-key" data-num="2" id="key-2">2</button>
+                <button class="key num-key" data-num="3" id="key-3">3</button>
+                <button class="key operator-key" data-operator="+" id="key-add" aria-label="Add">+</button>
+
+                <button class="key num-key zero-key" data-num="0" id="key-0">0</button>
+                <button class="key num-key" data-action="decimal" id="key-decimal" aria-label="Decimal Point">.</button>
+                <button class="key equals-key" data-action="calculate" id="calculate" aria-label="Calculate">=</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="history-overlay" class="drawer-overlay"></div>
+    <aside id="history-drawer" class="history-drawer" aria-label="History Drawer">
+        <div class="drawer-header">
+            <h3>Calculation History</h3>
+            <button id="close-history-btn" class="icon-btn" aria-label="Close History">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div id="history-list" class="history-list"></div>
+        <div class="drawer-footer">
+            <button id="clear-history-btn" class="secondary-btn">Clear History</button>
+        </div>
+    </aside>
+
+    <div id="toast" class="toast-notification" role="alert" aria-live="assertive"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
